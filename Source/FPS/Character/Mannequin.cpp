@@ -47,7 +47,7 @@ void AMannequin::BeginPlay()
         Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
     }
     else {
-        Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint_0"));
+        Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
     }
 
     Gun->AnimInstance = Mesh1P->GetAnimInstance();
@@ -75,7 +75,7 @@ void AMannequin::UnPossessed() {
     Super::UnPossessed();
     if (Gun)
     {
-        Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint_0"));
+        Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
     }
 }
 
