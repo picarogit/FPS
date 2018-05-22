@@ -50,8 +50,8 @@ void AMannequin::BeginPlay()
         Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
     }
 
-    Gun->AnimInstance = GetMesh()->GetAnimInstance();
-    //Gun->AnimInstance3P = GetMesh()->GetAnimInstance();
+    Gun->AnimInstance1P = Mesh1P->GetAnimInstance();
+    Gun->AnimInstance3P = GetMesh()->GetAnimInstance();
 
     if (InputComponent != nullptr) {
         InputComponent->BindAction("Fire", IE_Pressed, this, &AMannequin::PullTrigger);
