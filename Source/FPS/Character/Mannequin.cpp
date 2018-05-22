@@ -54,7 +54,7 @@ void AMannequin::BeginPlay()
     //Gun->AnimInstance3P = GetMesh()->GetAnimInstance();
 
     if (InputComponent != nullptr) {
-        InputComponent->BindAction("Fire", IE_Pressed, this, &AMannequin::PullTrigger);
+        InputComponent->BindAction("Fire", IE_Pressed, this, &AMannequin::PulledTrigger);
     }
 }
 
@@ -79,7 +79,7 @@ void AMannequin::UnPossessed() {
     }
 }
 
-void AMannequin::PullTrigger()
+void AMannequin::PulledTrigger()
 {
     Gun->OnFire();
 }

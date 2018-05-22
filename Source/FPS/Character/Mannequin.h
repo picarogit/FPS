@@ -34,7 +34,7 @@ public:
     TSubclassOf<AMyGun> GunBlueprint;
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void PullTrigger();
+    void PulledTrigger();
 
 private:
     /** Pawn mesh: 1st person view (arms; seen only by self) */
