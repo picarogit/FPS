@@ -14,11 +14,11 @@ ATile::ATile()
 
 static UActorComponent* GetActorFromArray(const TArray<UActorComponent*>& actorComponents, FString name)
 {
-    UActorComponent* const * other = actorComponents.FindByPredicate([name](UActorComponent* uac) { return uac->GetName().Equals( name ); });
+    UActorComponent* const* result = actorComponents.FindByPredicate([name](UActorComponent* uac) { return uac->GetName().Equals( name ); });
     
-    if (other)
+    if (result)
     {
-        return *other;
+        return *result;
     }
 
     return nullptr;
