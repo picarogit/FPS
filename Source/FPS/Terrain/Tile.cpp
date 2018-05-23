@@ -2,6 +2,7 @@
 
 #include "Tile.h"
 #include "Classes/Components/StaticMeshComponent.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
 
 // Sets default values
 ATile::ATile()
@@ -23,24 +24,33 @@ static UActorComponent* GetActorFromArray(const TArray<UActorComponent*>& actorC
     return nullptr;
 }
 
-FVector ATile::PlaceActors()
+void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn)
 {
-    FVector location = this->GetActorLocation();
-    const TArray<UActorComponent*> components = GetComponentsByClass(UStaticMeshComponent::StaticClass());
-    const UStaticMeshComponent* terrain = Cast<const UStaticMeshComponent> (GetActorFromArray(components, FString("Ground"))); //
-    FVector min;
-    FVector max;
-    
-    terrain->GetLocalBounds(min, max);
-    auto radius = 0.5 * (max.X - min.X);
-    min.Z = max.Z + 0.0;
-    min += location;
-    max += location;
-    min.X += radius;
-    max.X += radius;
-    FVector point = FMath::RandPointInBox(FBox(min, max));
+    if (minSpawn >= 1 && maxSpawn >= minSpawn)
+    {
+        FVector location = this->GetActorLocation();
+        const TArray<UActorComponent*> components = GetComponentsByClass(UStaticMeshComponent::StaticClass());
+        const UStaticMeshComponent* terrain = Cast<const UStaticMeshComponent>(GetActorFromArray(components, FString("Ground"))); //
+        FVector min, max;
 
-    return point;
+        terrain->GetLocalBounds(min, max);
+        auto radius = 0.5 * (max.X - min.X);
+
+        min.X += radius;
+        max.X += radius;
+        max.Z = 0;
+        min.Z = 0;
+
+        int numberToSpawn = FMath::RandRange(minSpawn, maxSpawn);
+        for (size_t i = 0; i < numberToSpawn; i++)
+        {
+            FVector spawnPoint = FMath::RandPointInBox(FBox(min, max));
+            FRotator Rotation(0.0f, 0.0f, 0.0f);
+            AActor* spawned = GetWorld()->SpawnActor<AActor>(toSpawn);
+            spawned->SetActorRelativeLocation(spawnPoint);
+            spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+        }
+    }
 }
 
 // Called when the game starts or when spawned
