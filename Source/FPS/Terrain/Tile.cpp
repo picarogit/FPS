@@ -3,6 +3,7 @@
 #include "Tile.h"
 #include "Classes/Components/StaticMeshComponent.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "Runtime/Engine/Public/DrawDebugHelpers.h"
 
 // Sets default values
 ATile::ATile()
@@ -57,7 +58,10 @@ void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn)
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
+
+    CastSphere(GetActorLocation(), 300.0);
 	
+    CastSphere(GetActorLocation() + FVector(0, 0, 600), 300);
 }
 
 // Called every frame
@@ -65,5 +69,24 @@ void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+bool ATile::CastSphere(FVector location, float radius)
+{
+    FHitResult hitResult;
+
+    bool hasHit = GetWorld()->SweepSingleByChannel(
+        hitResult, 
+        location, 
+        location, 
+        FQuat::Identity, 
+        ECollisionChannel::ECC_Camera, 
+        FCollisionShape::MakeSphere(radius)
+    );
+
+    FColor resultColor = hasHit ? FColor::Red : FColor::Green;
+    DrawDebugSphere(GetWorld(), location, radius, 40, resultColor, true, 100);
+
+    return hasHit;
 }
 
