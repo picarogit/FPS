@@ -25,13 +25,29 @@ static UActorComponent* GetActorFromArray(const TArray<UActorComponent*>& actorC
     return nullptr;
 }
 
-void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn)
+bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& result)
+{
+    for (size_t i = 0; i < 10; i++)
+    {
+        FVector spawnPoint = FMath::RandPointInBox(FBox(min, max));
+        
+        if (CastSphere(spawnPoint, radius))
+        {
+            result = spawnPoint;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn, float radius)
 {
     if (minSpawn >= 1 && maxSpawn >= minSpawn)
     {
         FVector location = this->GetActorLocation();
         const TArray<UActorComponent*> components = GetComponentsByClass(UStaticMeshComponent::StaticClass());
-        const UStaticMeshComponent* terrain = Cast<const UStaticMeshComponent>(GetActorFromArray(components, FString("Ground"))); //
+        const UStaticMeshComponent* terrain = Cast<const UStaticMeshComponent>(GetActorFromArray(components, FString("Ground")));
         FVector min, max;
 
         terrain->GetLocalBounds(min, max);
@@ -45,11 +61,19 @@ void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn)
         int numberToSpawn = FMath::RandRange(minSpawn, maxSpawn);
         for (size_t i = 0; i < numberToSpawn; i++)
         {
-            FVector spawnPoint = FMath::RandPointInBox(FBox(min, max));
-            FRotator Rotation(0.0f, 0.0f, 0.0f);
-            AActor* spawned = GetWorld()->SpawnActor<AActor>(toSpawn);
-            spawned->SetActorRelativeLocation(spawnPoint);
-            spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+            FVector spawnPoint;
+
+            if (GetEmptyLocation(radius, min, max, spawnPoint))
+            {
+                AActor* spawned = GetWorld()->SpawnActor<AActor>(toSpawn);
+                float collisionRadius = spawned->GetSimpleCollisionRadius();
+                FRotator Rotation(0.0f, 0.0f, 0.0f);
+                spawned->SetActorRelativeLocation(spawnPoint);
+                spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+            }
+            else
+            {
+            }
         }
     }
 }
@@ -85,8 +109,8 @@ bool ATile::CastSphere(FVector location, float radius)
     );
 
     FColor resultColor = hasHit ? FColor::Red : FColor::Green;
-    DrawDebugSphere(GetWorld(), location, radius, 40, resultColor, true, 100);
-
+    //DrawDebugSphere(GetWorld(), location, radius, 40, resultColor, true, 100);
+    DrawDebugCapsule(GetWorld(), location, 0, radius, FQuat::Identity, resultColor, true, 1000);
     return hasHit;
 }
 
