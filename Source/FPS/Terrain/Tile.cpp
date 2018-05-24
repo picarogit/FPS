@@ -16,13 +16,7 @@ ATile::ATile()
 static UActorComponent* GetActorFromArray(const TArray<UActorComponent*>& actorComponents, FString name)
 {
     UActorComponent* const* result = actorComponents.FindByPredicate([name](UActorComponent* uac) { return uac->GetName().Equals( name ); });
-    
-    if (result)
-    {
-        return *result;
-    }
-
-    return nullptr;
+    return result ? *result : nullptr;
 }
 
 bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& result)
@@ -30,8 +24,9 @@ bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& re
     for (size_t i = 0; i < 10; i++)
     {
         FVector spawnPoint = FMath::RandPointInBox(FBox(min, max));
-        
-        if (CastSphere(spawnPoint, radius))
+        FVector worldSpawnPoint = GetTransform().TransformPosition(spawnPoint);
+
+        if (!CastSphere(worldSpawnPoint, radius))
         {
             result = spawnPoint;
             return true;
@@ -41,7 +36,7 @@ bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& re
     return false;
 }
 
-void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn, float radius)
+void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn, float clearance)
 {
     if (minSpawn >= 1 && maxSpawn >= minSpawn)
     {
@@ -52,29 +47,29 @@ void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn,
 
         terrain->GetLocalBounds(min, max);
         auto radius = 0.5 * (max.X - min.X);
-
         min.X += radius;
         max.X += radius;
-        max.Z = 0;
-        min.Z = 0;
+        max.Z = min.Z = 0;
 
-        int numberToSpawn = FMath::RandRange(minSpawn, maxSpawn);
-        for (size_t i = 0; i < numberToSpawn; i++)
-        {
-            FVector spawnPoint;
+        for (size_t i = 0; i < FMath::RandRange(minSpawn, maxSpawn); i++) PlaceActor(toSpawn, min, max, clearance);
+    }
+}
 
-            if (GetEmptyLocation(radius, min, max, spawnPoint))
-            {
-                AActor* spawned = GetWorld()->SpawnActor<AActor>(toSpawn);
-                float collisionRadius = spawned->GetSimpleCollisionRadius();
-                FRotator Rotation(0.0f, 0.0f, 0.0f);
-                spawned->SetActorRelativeLocation(spawnPoint);
-                spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
-            }
-            else
-            {
-            }
-        }
+void ATile::PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const FVector &max, float clearance)
+{
+    FVector spawnPoint;
+    AActor* spawned = GetWorld()->SpawnActor<AActor>(toSpawn);
+    float radius = spawned->GetSimpleCollisionRadius() + clearance;
+
+    if (GetEmptyLocation(radius, min, max, spawnPoint))
+    {
+        FRotator Rotation(0.0f, 0.0f, 0.0f);
+        spawned->SetActorRelativeLocation(spawnPoint);
+        spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+    }
+    else
+    {
+        spawned->Destroy();
     }
 }
 
