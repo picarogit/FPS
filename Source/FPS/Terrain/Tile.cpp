@@ -36,7 +36,7 @@ bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& re
     return false;
 }
 
-void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn, float clearance)
+void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn, float clearance, float minScale, float maxScale)
 {
     if (minSpawn >= 1 && maxSpawn >= minSpawn)
     {
@@ -51,21 +51,25 @@ void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn,
         max.X += radius;
         max.Z = min.Z = 0;
 
-        for (size_t i = 0; i < FMath::RandRange(minSpawn, maxSpawn); i++) PlaceActor(toSpawn, min, max, clearance);
+        for (size_t i = 0; i < FMath::RandRange(minSpawn, maxSpawn); i++) PlaceActor(toSpawn, min, max, clearance, minScale, maxScale);
     }
 }
 
-void ATile::PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const FVector &max, float clearance)
+void ATile::PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const FVector &max, float clearance, float minScale, float maxScale)
 {
     FVector spawnPoint;
     AActor* spawned = GetWorld()->SpawnActor<AActor>(toSpawn);
-    float radius = spawned->GetSimpleCollisionRadius() + clearance;
+    float randomScale = FMath::RandRange(minScale, maxScale);
+    float radius = spawned->GetSimpleCollisionRadius() * randomScale + clearance;
 
     if (GetEmptyLocation(radius, min, max, spawnPoint))
     {
+        spawned->SetActorScale3D(FVector(randomScale));
+        float rotation = FMath::RandRange(-180.0f, 180.0f);
         FRotator Rotation(0.0f, 0.0f, 0.0f);
         spawned->SetActorRelativeLocation(spawnPoint);
         spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+        spawned->SetActorRotation(FRotator(0, rotation, 0));
     }
     else
     {

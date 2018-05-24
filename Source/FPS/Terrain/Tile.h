@@ -16,7 +16,7 @@ public:
 	ATile();
 
     UFUNCTION(BlueprintCallable, Category = "Setup")
-    void PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn = 1, int maxSpawn = 1, float clearance = 0.0);
+    void PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn = 1, int maxSpawn = 1, float clearance = 0.0, float minScale = 1.0, float maxScale = 1.0);
 
 
 protected:
@@ -28,7 +28,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-    void PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const FVector &max, float clearance);
+    void PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const FVector &max, float clearance, float minScale, float maxScale);
     bool GetEmptyLocation(float radius, FVector min, FVector max, FVector& result);
     bool CastSphere(FVector location, float radius);
 	
