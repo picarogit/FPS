@@ -19,6 +19,7 @@ static UActorComponent* GetActorFromArray(const TArray<UActorComponent*>& actorC
     return result ? *result : nullptr;
 }
 
+
 bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& result)
 {
     for (size_t i = 0; i < 10; i++)
@@ -36,22 +37,28 @@ bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& re
     return false;
 }
 
+FBox ATile::GetTerrainBox()
+{
+    const TArray<UActorComponent*> components = GetComponentsByClass(UStaticMeshComponent::StaticClass());
+    const UStaticMeshComponent* terrain = Cast<const UStaticMeshComponent>(GetActorFromArray(components, FString("Ground")));
+    FVector min, max;
+
+    terrain->GetLocalBounds(min, max);
+    auto radius = 0.5 * (max.X - min.X);
+    min.X += radius;
+    max.X += radius;
+    max.Z = min.Z = 0;
+
+    return FBox(min, max);
+}
+
 void ATile::PlaceActors(TSubclassOf<AActor> toSpawn, int minSpawn, int maxSpawn, float clearance, float minScale, float maxScale)
 {
     if (minSpawn >= 1 && maxSpawn >= minSpawn)
     {
         FVector location = this->GetActorLocation();
-        const TArray<UActorComponent*> components = GetComponentsByClass(UStaticMeshComponent::StaticClass());
-        const UStaticMeshComponent* terrain = Cast<const UStaticMeshComponent>(GetActorFromArray(components, FString("Ground")));
-        FVector min, max;
-
-        terrain->GetLocalBounds(min, max);
-        auto radius = 0.5 * (max.X - min.X);
-        min.X += radius;
-        max.X += radius;
-        max.Z = min.Z = 0;
-
-        for (size_t i = 0; i < FMath::RandRange(minSpawn, maxSpawn); i++) PlaceActor(toSpawn, min, max, clearance, minScale, maxScale);
+        FBox box = GetTerrainBox();
+        for (size_t i = 0; i < FMath::RandRange(minSpawn, maxSpawn); i++) PlaceActor(toSpawn, box.Min, box.Max, clearance, minScale, maxScale);
     }
 }
 
