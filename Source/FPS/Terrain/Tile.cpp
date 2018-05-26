@@ -6,6 +6,7 @@
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
 #include "Runtime/Engine/Classes/AI/Navigation/NavMeshBoundsVolume.h"
 #include "Runtime/Engine/Classes/AI/Navigation/NavigationSystem.h"
+#include "Runtime/Engine/Classes/GameFramework/Character.h"
 #include "EngineUtils.h"
 #include "../GameModes/ActorPool.h"
 
@@ -118,21 +119,64 @@ void ATile::PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const F
 {
     FVector spawnPoint;
     AActor* spawned = GetWorld()->SpawnActor<AActor>(toSpawn);
-    float randomScale = FMath::RandRange(minScale, maxScale);
-    float radius = spawned->GetSimpleCollisionRadius() * randomScale + clearance;
 
-    if (GetEmptyLocation(radius, min, max, spawnPoint))
+    if (spawned)
     {
-        spawned->SetActorScale3D(FVector(randomScale));
-        float rotation = FMath::RandRange(-180.0f, 180.0f);
-        FRotator Rotation(0.0f, 0.0f, 0.0f);
-        spawned->SetActorRelativeLocation(spawnPoint);
-        spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
-        spawned->SetActorRotation(FRotator(0, rotation, 0));
+        float randomScale = FMath::RandRange(minScale, maxScale);
+        float radius = spawned->GetSimpleCollisionRadius() * randomScale + clearance;
+
+        if (GetEmptyLocation(radius, min, max, spawnPoint))
+        {
+            spawned->SetActorScale3D(FVector(randomScale));
+            float rotation = FMath::RandRange(-180.0f, 180.0f);
+            FRotator Rotation(0.0f, 0.0f, 0.0f);
+            spawned->SetActorRelativeLocation(spawnPoint);
+            spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+            spawned->SetActorRotation(FRotator(0, rotation, 0));
+        }
+        else
+        {
+            spawned->Destroy();
+        }
     }
-    else
+}
+
+void ATile::PlaceAIPawns(TSubclassOf<APawn> toSpawn, int minSpawn, int maxSpawn, float clearance)
+{
+    if (minSpawn >= 1 && maxSpawn >= minSpawn)
     {
-        spawned->Destroy();
+        FVector location = this->GetActorLocation();
+        FBox box = GetTerrainBox();
+        for (size_t i = 0; i < FMath::RandRange(minSpawn, maxSpawn); i++) PlaceAIPawn(toSpawn, box.Min, box.Max, clearance);
+    }
+}
+
+void ATile::PlaceAIPawn(TSubclassOf<APawn> &toSpawn, const FVector &min, const FVector &max, float clearance)
+{
+    FVector spawnPoint;
+    FVector spawnLocationTemp = FVector(0.0, 0.0, 1000.0);
+    FRotator spawnRotationTemp(0.0f, 0.0f, 0.0f);
+    APawn* spawned = GetWorld()->SpawnActor<APawn>(toSpawn, spawnLocationTemp, spawnRotationTemp);
+
+    if (spawned)
+    {
+        float radius = spawned->GetSimpleCollisionRadius() + clearance;
+
+        if (GetEmptyLocation(radius, min, max, spawnPoint))
+        {
+            float rotation = FMath::RandRange(-180.0f, 180.0f);
+            FRotator Rotation(0.0f, 0.0f, 0.0f);
+            spawnPoint.Z += 100.0;
+            spawned->SetActorRelativeLocation(spawnPoint);
+            spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+            spawned->SetActorRotation(FRotator(0, rotation, 0));
+            spawned->SpawnDefaultController();
+            spawned->Tags.Add(FName("IsEnemy"));
+        }
+        else
+        {
+            spawned->Destroy();
+        }
     }
 }
 
