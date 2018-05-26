@@ -4,6 +4,7 @@
 #include "Classes/Components/StaticMeshComponent.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
+#include "EngineUtils.h"
 
 // Sets default values
 ATile::ATile()
@@ -89,9 +90,16 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
-    CastSphere(GetActorLocation(), 300.0);
-	
-    CastSphere(GetActorLocation() + FVector(0, 0, 1000), 300);
+    //TActorIterator<AActor> actorIterator = TActorIterator<AActor>(GetWorld());
+
+    //while (actorIterator)
+    //{
+    //    AActor* foundActor = *actorIterator;
+
+    //    UE_LOG(LogTemp, Warning, TEXT("Found Actor: %s"), *foundActor->GetName());
+
+    //    ++actorIterator;
+    //}
 }
 
 // Called every frame
