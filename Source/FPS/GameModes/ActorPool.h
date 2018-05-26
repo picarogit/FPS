@@ -13,7 +13,10 @@ struct FMeshAndStatus
 {
     GENERATED_USTRUCT_BODY()
 
+    UPROPERTY()
     AActor* Item;
+
+    UPROPERTY()
     bool IsCheckedOut;
 };
 
