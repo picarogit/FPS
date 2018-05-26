@@ -5,6 +5,7 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
 #include "Runtime/Engine/Classes/AI/Navigation/NavMeshBoundsVolume.h"
+#include "Runtime/Engine/Classes/AI/Navigation/NavigationSystem.h"
 #include "EngineUtils.h"
 #include "../GameModes/ActorPool.h"
 
@@ -36,6 +37,7 @@ void ATile::PositionNavMeshBoundsVolume()
         FVector location = GetActorLocation();
         location.X += Radius();
         CheckoutOutNavMeshBoundsVolume->SetActorLocation(location);
+        GetWorld()->GetNavigationSystem()->Build();
     }
     else
     {
@@ -138,11 +140,6 @@ void ATile::PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const F
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-
-    if (CheckoutOutNavMeshBoundsVolume)
-    {
-        CheckoutOutNavMeshBoundsVolume->RebuildNavigationData();
-    }
 }
 //
 //// Called every frame
