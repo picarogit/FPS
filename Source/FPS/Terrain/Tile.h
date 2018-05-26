@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+class UActorPool;
 struct FBox;
 
 UCLASS()
@@ -30,9 +31,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
     FBox GetTerrainBox();
 
+    UFUNCTION(BlueprintCallable, Category = "Pool")
+    void SetPool(UActorPool* pool);
+
 private:
     void PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const FVector &max, float clearance, float minScale, float maxScale);
     bool GetEmptyLocation(float radius, FVector min, FVector max, FVector& result);
     bool CastSphere(FVector location, float radius);
 	
+    UActorPool* ActorPool = nullptr;
 };

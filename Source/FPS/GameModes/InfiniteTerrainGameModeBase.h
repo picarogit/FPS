@@ -8,6 +8,7 @@
 
 
 class ANavMeshBoundsVolume;
+class UActorPool;
 
 /**
  * 
@@ -29,4 +30,8 @@ private:
 
     void AddToPool(ANavMeshBoundsVolume* volume);
 
+protected:
+
+    UPROPERTY(VisibleAnywhere,BlueprintReadOnly,  Category = "Pool")
+    UActorPool* ActorPool = nullptr;
 };

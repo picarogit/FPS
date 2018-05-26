@@ -5,6 +5,7 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
 #include "EngineUtils.h"
+#include "../GameModes/ActorPool.h"
 
 // Sets default values
 ATile::ATile()
@@ -12,6 +13,16 @@ ATile::ATile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+}
+
+void ATile::SetPool(UActorPool* pool)
+{
+    if (pool)
+    {
+        FString name = pool->GetName();
+        UE_LOG(LogTemp, Warning, TEXT("Setting pool: %s"), *name);
+        ActorPool = pool;
+    }
 }
 
 static UActorComponent* GetActorFromArray(const TArray<UActorComponent*>& actorComponents, FString name)
