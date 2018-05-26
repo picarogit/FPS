@@ -18,17 +18,12 @@ AActor* UActorPool::Checkout()
 {
     UE_LOG(LogTemp, Warning, TEXT("[%s] Checkout."), *GetName());
 
-    for (auto& e : IsCheckedOut)
+    for (auto& e : Items)
     {
-        if (!e.Value)
+        if (!e.Value.IsCheckedOut)
         {
-            e.Value = true;
-            auto found = Items.Find(e.Key);
-
-            if (found)
-            {
-                return *found;
-            }
+            e.Value.IsCheckedOut = true;
+            return e.Value.Item;
         }
     }
 
@@ -37,9 +32,9 @@ AActor* UActorPool::Checkout()
 
 void UActorPool::Return(AActor* actor)
 {
-    if (actor && IsCheckedOut.Contains(actor->GetName()))
+    if (actor && Items.Contains(actor->GetName()))
     {
-        IsCheckedOut[actor->GetName()] = false;
+        Items[actor->GetName()].IsCheckedOut = false;
     }
 }
 
@@ -47,7 +42,7 @@ void UActorPool::Add(AActor* actor)
 {
     if (actor)
     {
-        Items.Add(actor->GetName(), actor);
-        IsCheckedOut.Add(actor->GetName(), false);
+        FMeshAndStatus s = { actor, false };
+        Items.Add(actor->GetName(), s);
     }
 }

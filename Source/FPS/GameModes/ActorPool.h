@@ -8,6 +8,15 @@
 #include "ActorPool.generated.h"
 
 
+USTRUCT()
+struct FMeshAndStatus
+{
+    GENERATED_USTRUCT_BODY()
+
+    AActor* Item;
+    bool IsCheckedOut;
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FPS_API UActorPool : public UActorComponent
 {
@@ -24,8 +33,5 @@ public:
 private:
 
     UPROPERTY()
-    TMap<FString, AActor*> Items;
-
-    UPROPERTY()
-    TMap<FString, bool> IsCheckedOut;
+    TMap<FString, FMeshAndStatus> Items;
 };
