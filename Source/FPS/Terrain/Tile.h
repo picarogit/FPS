@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+class ANavMeshBoundsVolume;
 class UActorPool;
 struct FBox;
 
@@ -23,21 +24,26 @@ public:
 
 
 protected:
-	// Called when the game starts or when spawned
+	//// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
     FBox GetTerrainBox();
 
     UFUNCTION(BlueprintCallable, Category = "Pool")
     void SetPool(UActorPool* pool);
 
+
 private:
     void PlaceActor(TSubclassOf<AActor> &toSpawn, const FVector &min, const FVector &max, float clearance, float minScale, float maxScale);
     bool GetEmptyLocation(float radius, FVector min, FVector max, FVector& result);
     bool CastSphere(FVector location, float radius);
-	
+    void PositionNavMeshBoundsVolume();
+    float Radius();
+
     UActorPool* ActorPool = nullptr;
+    ANavMeshBoundsVolume* CheckoutOutNavMeshBoundsVolume = nullptr;
 };

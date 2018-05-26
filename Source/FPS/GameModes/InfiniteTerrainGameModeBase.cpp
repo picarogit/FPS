@@ -16,6 +16,7 @@ void AInfiniteTerrainGameModeBase::AddToPool(ANavMeshBoundsVolume* actor)
     if (actor)
     {
         UE_LOG(LogTemp, Warning, TEXT("Found Actor: %s"), *actor->GetName());
+        ActorPool->Add(actor);
     }
 }
 

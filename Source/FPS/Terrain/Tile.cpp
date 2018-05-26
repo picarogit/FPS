@@ -4,6 +4,7 @@
 #include "Classes/Components/StaticMeshComponent.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
+#include "Runtime/Engine/Classes/AI/Navigation/NavMeshBoundsVolume.h"
 #include "EngineUtils.h"
 #include "../GameModes/ActorPool.h"
 
@@ -22,7 +23,38 @@ void ATile::SetPool(UActorPool* pool)
         FString name = pool->GetName();
         UE_LOG(LogTemp, Warning, TEXT("Setting pool: %s"), *name);
         ActorPool = pool;
+        PositionNavMeshBoundsVolume();
     }
+}
+
+void ATile::PositionNavMeshBoundsVolume()
+{
+    CheckoutOutNavMeshBoundsVolume = Cast<ANavMeshBoundsVolume>(ActorPool->Checkout());
+
+    if (CheckoutOutNavMeshBoundsVolume)
+    {
+        FVector location = GetActorLocation();
+        location.X += Radius();
+        CheckoutOutNavMeshBoundsVolume->SetActorLocation(location);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Not enough actors in pool"));
+    }
+}
+
+void  ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    UE_LOG(LogTemp, Warning, TEXT("End Play: %s"), *GetName());
+
+    if (ActorPool)
+    {
+        ActorPool->Return(CheckoutOutNavMeshBoundsVolume);
+    }
+
+    CheckoutOutNavMeshBoundsVolume = nullptr;
 }
 
 static UActorComponent* GetActorFromArray(const TArray<UActorComponent*>& actorComponents, FString name)
@@ -47,6 +79,12 @@ bool ATile::GetEmptyLocation(float radius, FVector min, FVector max, FVector& re
     }
 
     return false;
+}
+
+float ATile::Radius()
+{
+    FBox box = GetTerrainBox();
+    return 0.5 * (box.Max.X - box.Min.X);
 }
 
 FBox ATile::GetTerrainBox()
@@ -101,24 +139,18 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
-    //TActorIterator<AActor> actorIterator = TActorIterator<AActor>(GetWorld());
-
-    //while (actorIterator)
-    //{
-    //    AActor* foundActor = *actorIterator;
-
-    //    UE_LOG(LogTemp, Warning, TEXT("Found Actor: %s"), *foundActor->GetName());
-
-    //    ++actorIterator;
-    //}
+    if (CheckoutOutNavMeshBoundsVolume)
+    {
+        CheckoutOutNavMeshBoundsVolume->RebuildNavigationData();
+    }
 }
-
-// Called every frame
-void ATile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
+//
+//// Called every frame
+//void ATile::Tick(float DeltaTime)
+//{
+//	Super::Tick(DeltaTime);
+//
+//}
 
 bool ATile::CastSphere(FVector location, float radius)
 {

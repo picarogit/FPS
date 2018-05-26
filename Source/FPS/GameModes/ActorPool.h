@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Runtime/Core/Public/Templates/Tuple.h"
 #include "Components/ActorComponent.h"
 #include "ActorPool.generated.h"
 
@@ -20,4 +21,11 @@ public:
     void Return(AActor* actor);
     void Add(AActor* actor);
 
+private:
+
+    UPROPERTY()
+    TMap<FString, AActor*> Items;
+
+    UPROPERTY()
+    TMap<FString, bool> IsCheckedOut;
 };
